@@ -24,6 +24,19 @@ app.post("/movies", async (req, res) => {
   const { title, genre_id, language_id, oscar_count, release_date } = req.body;
 
   try {
+    const movieWithSameTitle = await prisma.movie.findFirst({
+      where: {
+        title: { equals: title, mode: "insensitive" },
+      },
+    });
+
+    if (movieWithSameTitle) {
+      res
+        .status(409)
+        .send({ message: "Já existe um filme cadastrado com esse título" });
+      return;
+    }
+
     await prisma.movie.create({
       data: {
         title,
@@ -33,6 +46,7 @@ app.post("/movies", async (req, res) => {
         release_date: new Date(release_date),
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     res.status(500).send({ message: "Falha ao cadastrar um filme" });
   }
