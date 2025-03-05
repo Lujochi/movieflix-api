@@ -80,6 +80,27 @@ app.put("/movies/:id", async (req, res) => {
   res.status(201).send();
 });
 
+app.delete("/movies/:id", async (req, res) => {
+  const id = Number(req.params.id);
+
+  try {
+    const movie = await prisma.movie.findUnique({
+      where: { id },
+    });
+
+    if (!movie) {
+      res.status(404).send({ message: "Filme não encontrado" });
+      return;
+    }
+    await prisma.movie.delete({ where: { id } });
+  } catch (error) {
+    res.status(500).send({ message: "Falha ao remover o registro" });
+    return;
+  }
+
+  res.status(201).send();
+});
+
 app.listen(port, () => {
   console.log("Servidor em execução na porta 3000");
 });
